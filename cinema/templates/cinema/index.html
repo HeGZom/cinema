@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+  <main>
+      <div class="container py-5">
+        <h1 class="text-center">Афиша фильмов</h1>
+        <article>
+          <div class="row">
+            {% for post in index %}
+              <div class="col-md-4 mb-4"> <!-- Каждая карточка будет занимать 1/3 ширины экрана -->
+                <div class="card">
+                  {% if post.image %}
+                    <div class="card-img-top">
+                      <img src="{% static post.image %}" alt="{{ post.title }} {{ post.location }}" class="img-fluid" style="width: 350px; height: 350px; object-fit: cover;"  >
+                    </div>
+                  {% endif %}
+                  <div class="card-body">
+                    <h5 class="card-title">{{ post.location }}</h5>
+                    <p class="card-text" style="font-weight: bold;">{{ post.title }}</p>
+                    <p class="card-text">{{ post.date }}</p>
+                    <p class="card-text">Жанр: <a href="{% url 'cinema:category_posts' post.category %}">{{ post.category }}</a></p>
+                    <p class="card-text">{{ post.text|truncatewords:10 }}</p>
+                    <a href="{% url 'cinema:post_detail' post.id %}" class="btn btn-primary">Узнать больше</a>
+                  </div>
+                </div>
+              </div>
+              {% if forloop.counter|divisibleby:3 and not forloop.last %}
+                </div><div class="row"> <!-- Новая строка после каждых 3 фильмов -->
+              {% endif %}
+            {% endfor %}
+          </div>
+        </article>
+      </div>
+  </main>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<main>
+  <div class="container py-5">
+    <!-- Заголовок фильма -->
+    <h1 class="text-center mb-4">{{ post.title }}</h1>
+
+    <div class="row">
+      <!-- Информация о фильме справа -->
+      <div class="col-lg-6 mb-3">
+        <ul class="list-group">
+          <li class="list-group-item"><strong>Дата показа:</strong> {{ post.date }}</li>
+          <li class="list-group-item"><strong>Режиссер:</strong> {{ post.director }}</li>
+          <li class="list-group-item"><strong>Жанр:</strong> {{ post.genre }}</li>
+          <li class="list-group-item"><strong>Актеры:</strong> {{ post.cast }}</li>
+          <li class="list-group-item">
+            <strong>Категория:</strong> <a href="{% url 'cinema:category_posts' post.category %}" class="text-decoration-none">{{ post.category }}</a>
+          </li>
+        </ul>
+
+        <div class="mt-4">
+          <h3>Описание</h3>
+          <p>{{ post.text }}</p>
+        </div>
+
+        <!-- Кнопка бронирования -->
+        <div class="mt-4">
+          <a href="#" class="btn btn-primary btn-lg">Забронировать места</a>
+        </div>
+
+{#        {% if post.trailer %}#}
+{#          <div class="mt-5">#}
+{#            <h3>Трейлер</h3>#}
+{#                <iframe width="420" height="315"#}
+{#                src="https://www.youtube.com/embed/tgbNymZ7vqY">#}
+{#                </iframe>#}
+{#          </div>#}
+{#        {% endif %}#}
+      </div>
+
+      <!-- Изображение и трейлер фильма слева -->
+      <div class="col-lg-6">
+        <!-- Изображение фильма -->
+        {% if post.image %}
+          <div class="text-center mb-4">
+            <img src="{% static post.image %}" alt="{{ post.title }} {{ post.location }}" class="img-fluid" style="width: 450px; height: 450px; object-fit: cover;">
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}
