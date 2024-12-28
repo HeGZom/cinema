@@ -26,17 +26,12 @@
 
         <!-- Кнопка бронирования -->
         <div class="mt-4">
-          <a href="#" class="btn btn-primary btn-lg">Забронировать места</a>
+          {% if post.session_id %}
+              <a href="{% url 'cinema:session_detail' session_id=post.session_id %}" class="btn btn-primary btn-lg">Забронировать места</a>
+            {% else %}
+              <button class="btn btn-primary btn-lg" disabled>Нет доступных сеансов</button>
+{% endif %}
         </div>
-
-{#        {% if post.trailer %}#}
-{#          <div class="mt-5">#}
-{#            <h3>Трейлер</h3>#}
-{#                <iframe width="420" height="315"#}
-{#                src="https://www.youtube.com/embed/tgbNymZ7vqY">#}
-{#                </iframe>#}
-{#          </div>#}
-{#        {% endif %}#}
       </div>
 
       <!-- Изображение и трейлер фильма слева -->

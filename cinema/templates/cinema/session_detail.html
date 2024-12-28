@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}
+  Сеанс {{ session.movie.title }}
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="row">
+    <!-- Постер фильма -->
+    <div class="col-md-6 d-flex justify-content-center">
+      <img
+        src="{{ session.movie.poster.url }}"
+        alt="{{ session.movie.title }}"
+        class="img-fluid rounded shadow-lg"
+        style="max-height: 600px; object-fit: cover;">
+    </div>
+
+    <!-- Информация о фильме и бронирование -->
+    <div class="col-md-6">
+      <h1 class="display-4 mb-4">{{ session.movie.title }}</h1>
+      <p class="lead"><strong>Описание:</strong> {{ session.movie.description }}</p>
+      <p class="text-muted"><strong>Длительность:</strong> {{ session.movie.duration }} минут</p>
+      <p class="text-muted"><strong>Начало:</strong> {{ session.start_time|date:"d E Y H:i" }}</p>
+      <p class="text-muted"><strong>Зал:</strong> {{ session.hall.name }}</p>
+
+      <!-- Количество свободных мест -->
+      <div class="alert alert-info">
+        <strong>Свободные места:</strong> {{ session.get_available_seats|length }}
+      </div>
+
+      <!-- Проверяем, авторизован ли пользователь -->
+      {% if user.is_authenticated %}
+        <!-- Проверяем, есть ли доступные места -->
+        {% if session.get_available_seats|length > 0 %}
+          <!-- Форма для бронирования -->
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h3 class="card-title mb-4">Забронировать место</h3>
+              <form method="post">
+                {% csrf_token %}
+
+                <!-- Сетка мест -->
+                <div class="seat-map mb-4">
+                  {% for seat in session.seats.all %}
+                    <div class="seat-container">
+                      {% if seat.is_reserved %}
+                        <button type="button" class="seat reserved" disabled>Место {{ seat.number }}</button>
+                      {% else %}
+                        <button type="button" class="seat available" data-seat="{{ seat.id }}" data-seat-number="{{ seat.number }}">Место {{ seat.number }}</button>
+                      {% endif %}
+                    </div>
+                  {% endfor %}
+                </div>
+
+                <!-- Скрытое поле для отправки выбранного места -->
+                <input type="hidden" name="seat" id="selected-seat-input">
+
+                <!-- Кнопка отправки (включается только если место выбрано) -->
+                <button type="submit" class="btn btn-primary btn-lg w-100" id="submit-button" disabled>Забронировать</button>
+              </form>
+            </div>
+          </div>
+        {% else %}
+          <!-- Если мест нет, выводим сообщение -->
+          <div class="alert alert-warning">
+            К сожалению, все места на этот сеанс уже заняты.
+          </div>
+        {% endif %}
+      {% else %}
+        <!-- Если пользователь не авторизован, выводим сообщение -->
+        <div class="alert alert-warning">
+          Для бронирования мест необходимо <a href="{% url 'login' %}" class="alert-link">войти</a> или <a href="{% url 'registration' %}" class="alert-link">зарегистрироваться</a>.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Скрипты для динамического выбора места -->
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const seatButtons = document.querySelectorAll(".seat.available");
+    const selectedSeatInput = document.getElementById("selected-seat-input");
+    const submitButton = document.getElementById("submit-button");
+
+    seatButtons.forEach(function(button) {
+      button.addEventListener("click", function() {
+        const seatId = this.getAttribute("data-seat");
+        const seatNumber = this.getAttribute("data-seat-number");
+
+        // Записываем выбранное место в скрытое поле
+        selectedSeatInput.value = seatId;
+
+        // Включаем кнопку отправки
+        submitButton.disabled = false;
+
+        // Обновляем визуальное состояние (выбранное место)
+        seatButtons.forEach(function(btn) {
+          btn.classList.remove("selected");
+        });
+        this.classList.add("selected");
+      });
+    });
+  });
+</script>
+
+<!-- Стили для сетки мест -->
+<style>
+  .seat-map {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr); /* 10 мест в ряду */
+    gap: 10px;
+    margin: 20px 0;
+  }
+
+  .seat-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .seat {
+    padding: 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 14px;
+    transition: all 0.3s ease;
+  }
+
+  .seat:hover {
+    background-color: #e9ecef;
+    transform: scale(1.05);
+  }
+
+  .seat.selected {
+    background-color: #28a745;
+    color: white;
+    border-color: #28a745;
+  }
+
+  .seat.reserved {
+    background-color: #dc3545;
+    color: white;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  .card {
+    border: none;
+    border-radius: 12px;
+  }
+
+  .alert {
+    border-radius: 8px;
+  }
+
+  .btn-primary {
+    background-color: #007bff;
+    border: none;
+    padding: 12px;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn-primary:hover {
+    background-color: #0056b3;
+  }
+</style>
+
+{% endblock %}
